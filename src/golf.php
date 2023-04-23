@@ -11,7 +11,8 @@ function select_golf_report($week = null)
 {
     global $db, $week_fmt;
 
-    $now = new DateTimeImmutable();
+    $now = new DateTimeImmutable(getenv("DATE_NOW") ?? "now");
+    $now_wordle = wordle_for_day($now);
 
     $where = is_null($week)
         ? ""
@@ -47,11 +48,13 @@ function select_golf_report($week = null)
 
         if (!isset($week["wordles"])) {
             $week["wordles"] = wordles_in_week($dt);
+            $week["wordles_dates"] = array_map(
+                "wordle_day_for",
+                $week["wordles"]
+            );
         }
 
         $row["guesses"] = json_decode($row["guesses"], true);
-
-        $week_done = $now > $week["dt"]->modify("Sunday this week");
 
         $res = [
             "name" => $row["name"],
@@ -71,6 +74,7 @@ function select_golf_report($week = null)
 
         foreach ($week["wordles"] as $wordle) {
             $guess = &$guesses[$wordle];
+            $day_done = $wordle < $now_wordle;
 
             if (!is_null($guess)) {
                 if ($guess < PAR) {
@@ -79,8 +83,8 @@ function select_golf_report($week = null)
 
                 $txt = $guess < 7 ? strval($guess) : "X";
             } else {
-                $guess = $week_done ? 7 : 0;
-                $txt = $week_done ? "-" : "";
+                $guess = $day_done ? 7 : 0;
+                $txt = $day_done ? "-" : "";
             }
 
             $res["guesses_txt"][] = $txt;
