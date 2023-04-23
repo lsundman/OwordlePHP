@@ -137,9 +137,13 @@ $specials = [
                 <tr>
                   <td></td>
                   <td></td>
-                  <?php foreach ($week["wordles"] as $wordle): ?>
-                  <td class="score"><?= $wordle ?></td>
-                  <?php endforeach; ?>
+                  <?php foreach ($week["wordles"] as $key => $wordle) {
+                      $txt = datefmt_format(
+                          $date_fmt,
+                          $week["wordles_dates"][$key]
+                      );
+                      echo "<td class='score' title='$txt'>", $wordle, "</td>";
+                  } ?>
                   <td></td>
                   <td></td>
                   <td></td>

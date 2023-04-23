@@ -10,6 +10,15 @@ $dt_long_fmt = datefmt_create(
     IntlDateFormatter::GREGORIAN
 );
 
+$date_fmt = datefmt_create(
+    "fi_FI",
+    IntlDateFormatter::SHORT,
+    IntlDateFormatter::SHORT,
+    "Europe/Helsinki",
+    IntlDateFormatter::GREGORIAN,
+    "dd.MM.YYYY"
+);
+
 $month_fmt = datefmt_create(
     "sv_SE",
     IntlDateFormatter::NONE,
