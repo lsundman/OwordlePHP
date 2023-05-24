@@ -1,11 +1,14 @@
-env := http://localhost:8000/bot.php
+
+ENV ?= http://localhost:8000/bot.php
+
+domain := $(shell python3 -c \
+	'from urllib.parse import urlsplit; print(urlsplit("$(ENV)").netloc)' \
+)
 
 week ?= $(shell date +"%V")
 
 wordle	?= 505
 score	?= 4/6
-
-domain ?= owordle.metis.dy.fi
 
 headers := -H "Content-type: application/json" \
 	-H "X-Telegram-Bot-Api-Secret-Token: $(SECRET_KEY)"
@@ -25,38 +28,38 @@ reg := $(shell echo {} | jq '{ \
 run:
 	php \
 		-d variables_order=EGPCS \
-		-S 0.0.0.0:8000 -t public
+		-S $(domain) -t public
 
 run-httpd:
 	httpd -f $(PWD)/server/mac_dev.conf -DFOREGROUND \
-		-C 'ServerName localhost:8000' \
+		-C 'ServerName $(domain)' \
 		-C 'Define SECRET_KEY $(SECRET_KEY)' \
 		-C 'Define PWD $(PWD)'
 
 test-wordle:
 	@curl $(headers) \
 		-d '$(shell echo '$(msg)' | jq -rc '.message.text="Wordle $(wordle) $(score)"')' \
-		$(env)
+		$(ENV)
 
 test-medals:
 	@curl -s $(headers) \
 		-d '$(shell echo '$(msg)' | jq -rc '.message.text="/medaljer $(week)"')' \
-		$(env) | jq .text -r
+		$(ENV) | jq .text -r
 
 test-golf:
 	@curl -s $(headers) \
 		-d '$(shell echo '$(msg)' | jq -rc '.message.text="/golf $(week)"')' \
-		$(env) | jq .text -r
+		$(ENV) | jq .text -r
 
 test-streaks:
 	@curl -s $(headers) \
 		-d '$(shell echo '$(msg)' | jq -rc '.message.text="/streaks"')' \
-		$(env) | jq .text -r
+		$(ENV) | jq .text -r
 
 test-reports:
 	@curl -s $(headers) \
 		-d '$(shell echo '$(msg)' | jq -rc '.message.text="/tabeller"')' \
-		$(env) | jq .text -r
+		$(ENV) | jq .text -r
 
 test-all: test-medals test-golf test-streaks test-reports
 
@@ -75,3 +78,9 @@ deploy:
 		--exclude=".[!.]*" \
 		--rsync-path="sudo -u www-data rsync" \
 		public src server $(SSH_HOST):/var/www/owordle/
+
+deploy-config:
+	@rsync \
+		--rsync-path="sudo rsync" \
+		server/apache.conf $(SSH_HOST):/etc/apache2/sites-available/owordle.conf
+	@ssh $(SSH_HOST) sudo systemctl reload apache2
