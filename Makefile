@@ -5,7 +5,7 @@ week ?= $(shell date +"%V")
 wordle	?= 505
 score	?= 4/6
 
-domain := owordle.dy.fi
+domain ?= owordle.metis.dy.fi
 
 headers := -H "Content-type: application/json" \
 	-H "X-Telegram-Bot-Api-Secret-Token: $(SECRET_KEY)"
@@ -34,7 +34,7 @@ run-httpd:
 		-C 'Define PWD $(PWD)'
 
 test-wordle:
-	@curl -v $(headers) \
+	@curl $(headers) \
 		-d '$(shell echo '$(msg)' | jq -rc '.message.text="Wordle $(wordle) $(score)"')' \
 		$(env)
 

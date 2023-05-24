@@ -6,7 +6,9 @@ $db_exists = file_exists($db_path);
 
 $db = new SQLite3($db_path);
 
-$db->busyTimeout(5000);
+$db->busyTimeout(30000);
+
+$db->exec('PRAGMA journal_mode = wal;');
 
 $db->createFunction(
     "wordle_week_for",
@@ -20,6 +22,8 @@ $db->createFunction(
 if (!$db_exists) {
     $db->exec(
         <<<EOF
+BEGIN;
+
   -- Users
 CREATE TABLE user (
     id integer PRIMARY KEY ON CONFLICT REPLACE,
@@ -38,6 +42,7 @@ CREATE TABLE result (
 
 CREATE INDEX user_wordle_idx ON result(user_id, wordle);
 
+COMMIT;
 EOF
     );
 }

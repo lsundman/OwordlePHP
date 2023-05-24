@@ -19,6 +19,8 @@ function handle_message($msg)
     $re_action = "/^\/(?P<action>\w+)\s?(?P<week>\d{0,2})$/";
 
     if (preg_match($re_wordle, $msg["text"], $matches)) {
+        $db->exec("BEGIN;");
+
         $wordle = (int) $matches["wordle"];
         $guesses = $matches["guesses"] === "X" ? 7 : (int) $matches["guesses"];
         $hard_mode = isset($matches["hard_mode"]);
@@ -49,6 +51,8 @@ function handle_message($msg)
         if (!$result) {
             syslog(LOG_ERR, "Could not insert result.");
         }
+
+        $db->exec("COMMIT;");
     } else {
         $week_dt = date_create_immutable()->modify("Monday this week");
 
