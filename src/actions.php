@@ -15,7 +15,7 @@ function handle_message($msg)
     global $db;
 
     $re_wordle =
-        "/Wordle (?P<wordle>\d{1,3}) (?P<guesses>[1-6]|X)\/6(?P<hard_mode>\*){0,1}/";
+        "/Wordle (?P<wordle>\d{1,4}) (?P<guesses>[1-6]|X)\/6(?P<hard_mode>\*){0,1}/";
     $re_action = "/^\/(?P<action>\w+)\s?(?P<week>\d{0,2})$/";
 
     if (preg_match($re_wordle, $msg["text"], $matches)) {
