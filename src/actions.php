@@ -14,16 +14,24 @@ function handle_message($msg)
 {
     global $db;
 
-    $re_wordle =
-        "/Wordle (?P<wordle>\d{1,4}) (?P<guesses>[1-6]|X)\/6(?P<hard_mode>\*){0,1}/";
     $re_action = "/^\/(?P<action>\w+)\s?(?P<week>\d{0,2})$/";
 
-    if (preg_match($re_wordle, $msg["text"], $matches)) {
-        $db->exec("BEGIN;");
+    if (str_starts_with($msg["text"], "Wordle")) {
+        $line = explode("\n", $msg["text"], 2)[0];
 
-        $wordle = (int) $matches["wordle"];
-        $guesses = $matches["guesses"] === "X" ? 7 : (int) $matches["guesses"];
-        $hard_mode = isset($matches["hard_mode"]);
+        $line = str_replace("\u{00a0}", "", $line);
+        $line = str_replace(",", "", $line);
+        $line = str_replace(".", "", $line);
+
+        $arr = explode(" ", $line);
+
+        $gspec = $arr[count($arr) - 1];
+
+        $wordle = intval($arr[1]);
+        $guesses = $gspec[0] == "X" ? 7 : intval($gspec[0]);
+        $hard_mode = str_contains($gspec, "*");
+
+        $db->exec("BEGIN;");
 
         $stmt = $db->prepare(
             "INSERT INTO USER (id, name) VALUES (:user_id, :user_name)"
