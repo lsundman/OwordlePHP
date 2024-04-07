@@ -77,7 +77,7 @@ deploy:
 	@rsync -rz \
 		--exclude=".[!.]*" \
 		--rsync-path="sudo -u www-data rsync" \
-		public src server $(SSH_HOST):/var/www/owordle/
+		public src $(SSH_HOST):/var/www/owordle/
 
 deploy-config:
 	@rsync \
