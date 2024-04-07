@@ -70,7 +70,7 @@ function handle_message($msg)
 
         syslog(LOG_DEBUG, "Matches: \n" . var_export($matches, true));
 
-        if (isset($matches["week"])) {
+        if ($matches["week"]) {
             $year = $week_dt->format("Y");
             $week = intval($matches["week"]);
             $new_dt = date_create_immutable(
@@ -86,7 +86,7 @@ function handle_message($msg)
 
         switch ($matches["action"]) {
             case "medaljer":
-                return bot_action_medals($week_dt);
+                return bot_action_medals($matches["week"] ? $week_dt : null);
             case "golf":
                 return bot_action_golf($week_dt);
             case "streaks":

@@ -92,11 +92,12 @@ EOF;
     return $rows;
 }
 
-function bot_action_medals($week_dt)
+function bot_action_medals($week_dt = null)
 {
     global $week_year_fmt;
 
     $rows = select_medals_report($week_dt);
+    $rows = array_slice($rows, 0, 10);
 
     if (empty($rows)) {
         return "Inga resultat ännu!";
@@ -107,9 +108,13 @@ function bot_action_medals($week_dt)
     $header = [
         EMOJI_TROPHY,
         "Medaljer",
-        "(" . datefmt_format($week_year_fmt, $week_dt) . ")",
-        EMOJI_TROPHY,
     ];
+
+    if (!is_null($week_dt)) {
+        array_push($header, "(" . datefmt_format($week_year_fmt, $week_dt) . ")");
+    }
+
+    array_push($header, EMOJI_TROPHY);
 
     array_push($table, implode(" ", $header));
 
