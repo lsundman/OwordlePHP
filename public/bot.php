@@ -13,7 +13,7 @@ if (is_null($body)) {
     exit();
 }
 
-syslog(LOG_DEBUG, json_encode($body));
+syslog(LOG_INFO, json_encode($body));
 
 $text = &$body["message"]["text"];
 if (!isset($text) || gettype($text) != "string") {
